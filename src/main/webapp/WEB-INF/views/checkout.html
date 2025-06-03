@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh Toán</title>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navigation :: navbar}"></div>
+
+<div class="container">
+    <h1>Thông Tin Thanh Toán</h1>
+
+    <div th:if="${checkoutError}" class="message error-message" th:text="${checkoutError}"></div>
+
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 2;">
+            <h3>Thông tin giao hàng</h3>
+            <form th:action="@{/checkout}" th:object="${order}" method="post">
+                <div class="form-group">
+                    <label for="recipientName">Tên người nhận:</label>
+                    <input type="text" id="recipientName" th:field="*{recipientName}" />
+                    <span th:if="${#fields.hasErrors('recipientName')}" th:errors="*{recipientName}" class="error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Số điện thoại:</label>
+                    <input type="text" id="phoneNumber" th:field="*{phoneNumber}" />
+                    <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="address">Địa chỉ giao hàng:</label>
+                    <textarea id="address" th:field="*{address}" rows="3"></textarea>
+                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="error"></span>
+                </div>
+                <button type="submit" class="button">Xác Nhận Đặt Hàng</button>
+            </form>
+        </div>
+        <div style="flex: 1;">
+            <h3>Đơn hàng của bạn</h3>
+            <div th:if="${cartItems != null and !cartItems.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>SL</th>
+                        <th>Giá</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${cartItems}">
+                        <td th:text="${item.product.productName}">Tên sản phẩm</td>
+                        <td th:text="${item.quantity}">SL</td>
+                        <td th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Giá</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="cart-total" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
+                    Tổng cộng: <span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                </div>
+            </div>
+            <div th:if="${cartItems == null or cartItems.isEmpty()}">
+                <p>Giỏ hàng của bạn trống.</p>
+            </div>
+        </div>
+    </div>
+    <a th:href="@{/cart}" class="button button-secondary" style="margin-top:20px;">Quay lại giỏ hàng</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Nhập</title>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navigation :: navbar}"></div>
+
+<div class="container">
+    <h1>Đăng Nhập</h1>
+
+    <div th:if="${param.logoutSuccess}" class="message success-message">
+        Bạn đã đăng xuất thành công!
+    </div>
+    <div th:if="${param.registerSuccess}" class="message success-message" th:text="${param.registerSuccess[0]}">
+    </div>
+    <div th:if="${errorMessage}" class="message error-message" th:text="${errorMessage}">
+    </div>
+
+    <form th:action="@{/login}" th:object="${customer}" method="post">
+        <div class="form-group">
+            <label for="username">Tên đăng nhập:</label>
+            <input type="text" id="username" th:field="*{username}" required />
+            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"></span>
+        </div>
+        <div class="form-group">
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" th:field="*{password}" required />
+            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+        </div>
+        <button type="submit">Đăng Nhập</button>
+    </form>
+    <p>Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a></p>
+</div>
+
+</body>
+</html>

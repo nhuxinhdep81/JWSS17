@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.productName}"></title>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navigation :: navbar}"></div>
+
+<div class="container" th:if="${product != null}">
+    <!-- Messages Section -->
+    <div class="messages-section">
+        <div th:if="${addSuccessMessage}" class="message success-message" th:text="${addSuccessMessage}"></div>
+        <div th:if="${addErrorMessage}" class="message error-message" th:text="${addErrorMessage}"></div>
+        <div th:if="${param.addSuccessMessage}" class="message success-message" th:text="${param.addSuccessMessage[0]}"></div>
+        <div th:if="${param.addErrorMessage}" class="message error-message" th:text="${param.addErrorMessage[0]}"></div>
+    </div>
+
+    <!-- Product Detail Grid Layout -->
+    <div class="product-detail-grid">
+        <!-- Left Column - Product Image -->
+        <div class="product-image-section">
+            <div class="image-wrapper">
+                <img th:src="${product.image ?: '/placeholder.png'}"
+                     th:alt="${product.productName}"
+                     class="product-detail-img"/>
+            </div>
+            <div class="image-gallery">
+                <!-- Placeholder for additional images -->
+                <div class="thumbnail-images">
+                    <img th:src="${product.image ?: '/placeholder.png'}"
+                         th:alt="${product.productName}"
+                         class="thumbnail-img active"/>
+                    <div class="thumbnail-placeholder"></div>
+                    <div class="thumbnail-placeholder"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Product Information -->
+        <div class="product-info-section">
+            <div class="product-header">
+                <h1 th:text="${product.productName}">Tên sản phẩm</h1>
+                <div class="product-meta">
+                    <span class="product-id">ID: <span th:text="${product.id}"></span></span>
+                    <span class="stock-status"
+                          th:class="${product.stock > 0 ? 'in-stock' : 'out-of-stock'}"
+                          th:text="${product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}">Trạng thái</span>
+                </div>
+            </div>
+
+            <div class="product-details">
+                <!-- Price Section -->
+                <div class="price-section">
+                    <div class="current-price">
+                        <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Giá</span>
+                    </div>
+                    <div class="price-note">Giá đã bao gồm VAT</div>
+                </div>
+
+                <!-- Description Section -->
+                <div class="description-section">
+                    <h3>Mô tả sản phẩm</h3>
+                    <div class="description-content">
+                        <p th:text="${product.description}">Mô tả sản phẩm</p>
+                    </div>
+                </div>
+
+                <!-- Stock Info -->
+                <div class="stock-section">
+                    <div class="stock-info">
+                        <span class="stock-label">Số lượng còn lại:</span>
+                        <span class="stock-number" th:text="${product.stock > 0 ? product.stock + ' sản phẩm' : 'Hết hàng'}">Số lượng tồn kho</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to Cart Section -->
+            <div class="add-to-cart-section">
+                <form th:action="@{/cart/add}" method="post" th:if="${product.stock > 0}" class="cart-form">
+                    <input type="hidden" name="productId" th:value="${product.id}" />
+
+                    <div class="quantity-selector">
+                        <label for="quantity">Chọn số lượng:</label>
+                        <div class="quantity-controls">
+                            <button type="button" class="qty-btn minus">-</button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" th:max="${product.stock}" />
+                            <button type="button" class="qty-btn plus">+</button>
+                        </div>
+                        <span class="max-qty">Tối đa: <span th:text="${product.stock}"></span></span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="add-to-cart-btn">
+                            <span>🛒</span>
+                            Thêm vào giỏ hàng
+                        </button>
+                        <button type="button" class="buy-now-btn">
+                            <span>⚡</span>
+                            Mua ngay
+                        </button>
+                    </div>
+                </form>
+
+                <div th:if="${product.stock <= 0}" class="out-of-stock-section">
+                    <div class="out-of-stock-message">
+                        <span>❌</span>
+                        <p>Sản phẩm này hiện đã hết hàng.</p>
+                    </div>
+                    <button class="notify-btn">Thông báo khi có hàng</button>
+                </div>
+            </div>
+
+            <!-- Action Links -->
+            <div class="product-actions">
+                <a th:href="@{/home}" class="button button-secondary back-btn">
+                    <span>⬅️</span>
+                    Quay lại danh sách
+                </a>
+                <button class="share-btn">
+                    <span>📤</span>
+                    Chia sẻ
+                </button>
+                <button class="favorite-btn">
+                    <span>❤️</span>
+                    Yêu thích
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Info Tabs -->
+    <div class="product-tabs">
+        <div class="tab-headers">
+            <button class="tab-btn active" data-tab="specs">Thông số kỹ thuật</button>
+            <button class="tab-btn" data-tab="reviews">Đánh giá</button>
+            <button class="tab-btn" data-tab="shipping">Vận chuyển</button>
+        </div>
+        <div class="tab-content">
+            <div class="tab-panel active" id="specs">
+                <table class="specs-table">
+                    <tr>
+                        <td>Mã sản phẩm</td>
+                        <td th:text="${product.id}"></td>
+                    </tr>
+                    <tr>
+                        <td>Tên sản phẩm</td>
+                        <td th:text="${product.productName}"></td>
+                    </tr>
+                    <tr>
+                        <td>Giá bán</td>
+                        <td th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                    </tr>
+                    <tr>
+                        <td>Tình trạng</td>
+                        <td th:text="${product.stock > 0 ? 'Còn ' + product.stock + ' sản phẩm' : 'Hết hàng'}"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="tab-panel" id="reviews">
+                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+            </div>
+            <div class="tab-panel" id="shipping">
+                <p>Miễn phí vận chuyển cho đơn hàng trên 500,000 VNĐ</p>
+                <p>Thời gian giao hàng: 2-3 ngày làm việc</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" th:if="${product == null}">
+    <div class="not-found-section">
+        <div class="not-found-icon">🔍</div>
+        <h2>Không tìm thấy sản phẩm</h2>
+        <p>Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+        <a th:href="@{/home}" class="button button-secondary">
+            <span>🏠</span>
+            Quay lại trang chủ
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Product Detail Specific Styles */
+    .product-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 30px 0;
+    }
+
+    .product-image-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .image-wrapper {
+        position: relative;
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .product-detail-img {
+        width: 100%;
+        height: 400px;
+        object-fit: contain;
+        border-radius: 15px;
+        max-width: none !important;
+    }
+
+    .thumbnail-images {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .thumbnail-img, .thumbnail-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .thumbnail-img.active {
+        opacity: 1;
+        border: 3px solid #667eea;
+    }
+
+    .thumbnail-placeholder {
+        background: #f1f2f6;
+        border: 2px dashed #ddd;
+    }
+
+    .product-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .product-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2em;
+        color: #2c3e50;
+    }
+
+    .product-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .product-id {
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    .stock-status {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .in-stock {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .price-section {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .current-price {
+        font-size: 2.5em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .price-note {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .description-section h3 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+    }
+
+    .description-content {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+    .stock-section {
+        background: #e8f4fd;
+        padding: 15px 20px;
+        border-radius: 12px;
+    }
+
+    .stock-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stock-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .stock-number {
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .cart-form {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .quantity-selector {
+        margin-bottom: 20px;
+    }
+
+    .quantity-selector label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .qty-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .qty-btn:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .quantity-controls input {
+        width: 80px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .max-qty {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .add-to-cart-btn, .buy-now-btn {
+        flex: 1;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .add-to-cart-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .buy-now-btn {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+    }
+
+    .out-of-stock-section {
+        background: #f8d7da;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .out-of-stock-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .notify-btn {
+        background: #6c757d;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .back-btn, .share-btn, .favorite-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .share-btn, .favorite-btn {
+        background: #f8f9fa;
+        border: 2px solid #e1e8ed;
+        color: #2c3e50;
+        text-decoration: none;
+    }
+
+    .product-tabs {
+        margin-top: 40px;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .tab-headers {
+        display: flex;
+        background: #f8f9fa;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 20px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+        background: white;
+        color: #667eea;
+    }
+
+    .tab-content {
+        padding: 30px;
+    }
+
+    .tab-panel {
+        display: none;
+    }
+
+    .tab-panel.active {
+        display: block;
+    }
+
+    .specs-table {
+        width: 100%;
+        border: none;
+        box-shadow: none;
+    }
+
+    .specs-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f2f6;
+    }
+
+    .specs-table td:first-child {
+        font-weight: 600;
+        background: #f8f9fa;
+        width: 30%;
+    }
+
+    .not-found-section {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .not-found-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .product-detail-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .product-actions {
+            justify-content: center;
+        }
+
+        .tab-headers {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<script>
+    // Quantity controls
+    document.addEventListener('DOMContentLoaded', function() {
+        const minusBtn = document.querySelector('.minus');
+        const plusBtn = document.querySelector('.plus');
+        const quantityInput = document.querySelector('#quantity');
+
+        if (minusBtn && plusBtn && quantityInput) {
+            minusBtn.addEventListener('click', function() {
+                const currentValue = parseInt(quantityInput.value);
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                }
+            });
+
+            plusBtn.addEventListener('click', function() {
+                const currentValue = parseInt(quantityInput.value);
+                const maxValue = parseInt(quantityInput.max);
+                if (currentValue < maxValue) {
+                    quantityInput.value = currentValue + 1;
+                }
+            });
+        }
+
+        // Tab functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+
+                // Remove active class from all tabs and panels
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanels.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding panel
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang Chủ</title>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navigation :: navbar}"></div>
+
+<div class="container">
+    <h1>Sản Phẩm Nổi Bật</h1>
+
+    <div th:if="${param.orderSuccessMessage}" class="message success-message" th:text="${param.orderSuccessMessage[0]}">
+    </div>
+    <div th:if="${param.productNotFound}" class="message error-message">
+        Sản phẩm không tìm thấy.
+    </div>
+    <div th:if="${param.checkoutError}" class="message error-message" th:text="${param.checkoutError[0]}">
+    </div>
+
+    <div class="product-list" th:if="${!products.isEmpty()}">
+        <div class="product-item" th:each="product : ${products}">
+            <a th:href="@{/product/{id}(id=${product.id})}">
+                <img th:src="${product.image ?: '/placeholder.png'}" th:alt="${product.productName}" />
+                <h3 th:text="${product.productName}">Tên sản phẩm</h3>
+            </a>
+            <p th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Giá</p>
+            <form th:action="@{/cart/add}" method="post" style="display:inline;">
+                <input type="hidden" name="productId" th:value="${product.id}" />
+                <input type="hidden" name="quantity" value="1" />
+                <button type="submit" class="button">Thêm vào giỏ</button>
+            </form>
+        </div>
+    </div>
+    <div th:if="${products.isEmpty()}">
+        <p>Không có sản phẩm nào để hiển thị.</p>
+    </div>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 1}" th:href="@{/home(page=${currentPage - 1}, size=${pageSize})}">Trước</a>
+        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:if="${i != currentPage}" th:href="@{/home(page=${i}, size=${pageSize})}" th:text="${i}"></a>
+                <span th:if="${i == currentPage}" class="current" th:text="${i}"></span>
+            </span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/home(page=${currentPage + 1}, size=${pageSize})}">Sau</a>
+    </div>
+</div>
+
+</body>
+</html>

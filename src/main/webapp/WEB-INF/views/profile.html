@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ Sơ Cá Nhân</title>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navigation :: navbar}"></div>
+
+<div class="container">
+    <h1>Hồ Sơ Cá Nhân</h1>
+
+    <div th:if="${param.updateSuccessMessage}" class="message success-message" th:text="${param.updateSuccessMessage[0]}"></div>
+    <div th:if="${param.cancelSuccessMessage}" class="message success-message" th:text="${param.cancelSuccessMessage[0]}"></div>
+    <div th:if="${param.cancelErrorMessage}" class="message error-message" th:text="${param.cancelErrorMessage[0]}"></div>
+
+
+    <div style="display: flex; gap: 30px;">
+        <div style="flex: 1;">
+            <h3>Thông tin tài khoản</h3>
+            <p><strong>Tên đăng nhập:</strong> <span th:text="${customer.username}"></span></p>
+            <p><strong>Vai trò:</strong> <span th:text="${customer.role}"></span></p>
+            <p><strong>Trạng thái:</strong> <span th:text="${customer.status ? 'Hoạt động' : 'Bị khóa'}"></span></p>
+
+            <hr/>
+            <h3>Cập nhật thông tin</h3>
+            <form th:action="@{/profile/update}" th:object="${customerForm}" method="post">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" th:field="*{email}" />
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Số điện thoại:</label>
+                    <input type="text" id="phoneNumber" th:field="*{phoneNumber}" />
+                    <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
+                </div>
+                <button type="submit">Cập Nhật Thông Tin</button>
+            </form>
+        </div>
+
+        <div style="flex: 2;">
+            <h3>Lịch sử đơn hàng</h3>
+            <div th:if="${orders.isEmpty()}">
+                <p>Bạn chưa có đơn hàng nào.</p>
+            </div>
+            <div th:if="${!orders.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Ngày Đặt (Giả định)</th>
+                        <th>Người nhận</th>
+                        <th>Địa chỉ</th>
+                        <th>SĐT</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.id}"></td>
+                        <td>(N/A)</td> <td th:text="${order.recipientName}"></td>
+                        <td th:text="${order.address}" style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></td>
+                        <td th:text="${order.phoneNumber}"></td>
+                        <td th:text="${#numbers.formatDecimal(order.totalMoney, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                        <td th:text="${order.status}"></td>
+                        <td>
+                            <a th:if="${order.status == 'PENDING'}"
+                               th:href="@{/profile/cancel-order(orderId=${order.id})}"
+                               class="button button-danger"
+                               onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">Hủy Đơn</a>
+                            <span th:unless="${order.status == 'PENDING'}">-</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="pagination" th:if="${totalPages > 1}">
+                    <a th:if="${currentPage > 1}" th:href="@{/profile(page=${currentPage - 1}, size=${pageSize})}">Trước</a>
+                    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                            <a th:if="${i != currentPage}" th:href="@{/profile(page=${i}, size=${pageSize})}" th:text="${i}"></a>
+                            <span th:if="${i == currentPage}" class="current" th:text="${i}"></span>
+                        </span>
+                    <a th:if="${currentPage < totalPages}" th:href="@{/profile(page=${currentPage + 1}, size=${pageSize})}">Sau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
