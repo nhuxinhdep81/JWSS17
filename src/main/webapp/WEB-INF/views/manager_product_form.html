@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${product.id != null} ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm'"></title>
+  <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/admin_navigation :: navbar_admin}"></div>
+
+<div class="container">
+  <h1 th:text="${product.id != null} ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm'"></h1>
+  <form th:action="@{/admin/products/save}" th:object="${product}" method="post">
+    <input type="hidden" th:field="*{id}" />
+    <div class="form-group">
+      <label for="productName">Tên sản phẩm:</label>
+      <input type="text" id="productName" th:field="*{productName}" />
+      <span th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}" class="error"></span>
+    </div>
+    <div class="form-group">
+      <label for="description">Mô tả:</label>
+      <textarea id="description" th:field="*{description}" rows="4"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="price">Giá:</label>
+      <input type="number" id="price" th:field="*{price}" step="0.01" />
+      <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="error"></span>
+    </div>
+    <div class="form-group">
+      <label for="stock">Tồn kho:</label>
+      <input type="number" id="stock" th:field="*{stock}" />
+      <span th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}" class="error"></span>
+    </div>
+    <div class="form-group">
+      <label for="image">URL ảnh:</label>
+      <input type="text" id="image" th:field="*{image}" placeholder="Nhập URL ảnh: " />
+      <span th:if="${#fields.hasErrors('image')}" th:errors="*{image}" class="error"></span>
+      <img th:if="${product.image}" th:src="${product.image}" style="width: 100px; height: auto; margin-top: 10px;" th:alt="${product.productName}" />
+    </div>
+    <button type="submit" class="button">Lưu</button>
+    <a th:href="@{/admin/products}" class="button button-secondary">Hủy</a>
+  </form>
+</div>
+
+</body>
+</html>

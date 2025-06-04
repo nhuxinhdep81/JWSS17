@@ -1,6 +1,5 @@
 package com.tien.config;
 
-import com.cloudinary.Cloudinary;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,7 +52,7 @@ public class AppConfig implements WebMvcConfigurer {
         CookieLocaleResolver resolver = new CookieLocaleResolver();
         resolver.setDefaultLocale(new Locale("vi"));
         resolver.setCookieName("lang");
-        resolver.setCookieMaxAge(60 * 60); // 1 giờ
+        resolver.setCookieMaxAge(60 * 60);
         return resolver;
     }
 
@@ -116,6 +115,7 @@ public class AppConfig implements WebMvcConfigurer {
         hibernateProperties.put("hibernate.show_sql", "true");
         hibernateProperties.put("hibernate.format_sql", "true");
         hibernateProperties.put("hibernate.hbm2ddl.auto", "update");
+
         sessionFactory.setHibernateProperties(hibernateProperties);
         return sessionFactory;
     }

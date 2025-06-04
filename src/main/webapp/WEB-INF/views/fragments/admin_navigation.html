@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar_admin">
+    <ul>
+        <li><a th:href="@{/admin}">Trang Chủ</a></li>
+        <li><a th:href="@{/admin/products}">Trang Quản Lý Sản Phẩm</a></li>
+        <li><a th:href="@{/admin/users}">Trang Quản Lý Người Dùng</a></li>
+        <li><a th:href="@{/admin/orders}">Trang Quản Lý Đơn Hàng</a></li>
+
+        <th:block th:if="${session.loggedInUser == null}">
+            <li><a th:href="@{/login}">Đăng Nhập</a></li>
+        </th:block>
+
+        <th:block th:if="${session.loggedInUser != null}">
+            <li><a th:href="@{/}" th:text="'Xin chào, ' + ${session.loggedInUser.username}"></a></li>
+            <li><a th:href="@{/logout}">Đăng Xuất</a></li>
+        </th:block>
+    </ul>
+</nav>
+</body>
+</html>

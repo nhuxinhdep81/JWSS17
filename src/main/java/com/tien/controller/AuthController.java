@@ -84,12 +84,5 @@ public class AuthController {
         return "redirect:/login?logoutSuccess=true";
     }
 
-    @GetMapping("/admin")
-    public String adminPage(HttpSession session) {
-        Customer loggedInUser = (Customer) session.getAttribute("loggedInUser");
-        if (loggedInUser == null || !"ADMIN".equalsIgnoreCase(loggedInUser.getRole())) {
-            return "redirect:/login";
-        }
-        return "admin";
-    }
+
 }

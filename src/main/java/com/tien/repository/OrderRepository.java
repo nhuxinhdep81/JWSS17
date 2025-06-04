@@ -11,4 +11,10 @@ public interface OrderRepository {
     List<Order> findByCustomerId(int customerId, int page, int size);
     long countByCustomerId(int customerId);
     Order findById(int orderId);
+    List<Order> findAllPaginated(int page, int size);
+    long countAll();
+    long countByStatus(String status);
+    double getTotalRevenue();
+    List<Order> findByRecipientNameAndStatusPaginated(String recipientName, String status, int page, int size);
+    long countByRecipientNameAndStatus(String recipientName, String status);
 }

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Đơn Hàng</title>
+    <style>
+        td form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-start;
+            margin: 0;
+        }
+
+        td form select {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 130px;
+            max-width: 150px;
+            background-color: #fff;
+            transition: border-color 0.2s ease;
+        }
+
+        td form select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        td form .button {
+            padding: 6px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        td form .button:hover {
+            background-color: #218838;
+        }
+
+        td form .button:active {
+            background-color: #1e7e34;
+        }
+
+        th:last-child,
+        td:last-child {
+            width: 280px;
+            min-width: 280px;
+        }
+
+        @media (max-width: 768px) {
+            td form {
+                flex-direction: column;
+                gap: 5px;
+                align-items: stretch;
+            }
+
+            td form select {
+                min-width: 100%;
+                font-size: 12px;
+            }
+
+            td form .button {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+
+            th:last-child,
+            td:last-child {
+                width: 200px;
+                min-width: 200px;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/admin_navigation :: navbar_admin}"></div>
+
+<div class="container">
+    <h1>Quản Lý Đơn Hàng</h1>
+    <div th:if="${param.statusUpdated}" class="message success-message">Cập nhật trạng thái thành công!</div>
+    <div th:text="'Số lượng đơn hàng: ' + ${#lists.size(orders)}"></div>
+
+    <!-- Form tìm kiếm -->
+    <form th:action="@{/admin/orders}" method="get" class="form-group">
+        <label for="recipientName">Tên người nhận:</label>
+        <input type="text" id="recipientName" name="recipientName" th:value="${recipientName}" placeholder="Nhập tên người nhận">
+        <label for="status">Trạng thái:</label>
+        <select id="status" name="status">
+            <option value="" th:selected="${status == null or status == ''}">Tất cả</option>
+            <option value="PENDING" th:selected="${status == 'PENDING'}">Đang chờ xử lý</option>
+            <option value="CONFIRMED" th:selected="${status == 'CONFIRMED'}">Đã xác nhận</option>
+            <option value="SHIPPED" th:selected="${status == 'SHIPPED'}">Đang giao hàng</option>
+            <option value="DELIVERED" th:selected="${status == 'DELIVERED'}">Đã giao</option>
+            <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+        </select>
+        <button type="submit" class="button">Tìm kiếm</button>
+        <a th:href="@{/admin/orders}" class="button button-secondary">Xóa tìm kiếm</a>
+        <input type="hidden" name="page" th:value="${currentPage}">
+        <input type="hidden" name="size" th:value="${pageSize}">
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Mã ĐH</th>
+            <th>Khách hàng ID</th>
+            <th>Người nhận</th>
+            <th>Địa chỉ</th>
+            <th>SĐT</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${order.customerId}"></td>
+            <td th:text="${order.recipientName}"></td>
+            <td th:text="${order.address}" style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></td>
+            <td th:text="${order.phoneNumber}"></td>
+            <td th:text="${#numbers.formatDecimal(order.totalMoney, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+            <td th:text="${order.status}"></td>
+            <td>
+                <form th:action="@{/admin/orders/update-status}" method="post">
+                    <input type="hidden" name="orderId" th:value="${order.id}" />
+                    <select name="status">
+                        <option value="PENDING" th:selected="${order.status == 'PENDING'}">Đang chờ xử lý</option>
+                        <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
+                        <option value="SHIPPED" th:selected="${order.status == 'SHIPPED'}">Đang giao hàng</option>
+                        <option value="DELIVERED" th:selected="${order.status == 'DELIVERED'}">Đã giao</option>
+                        <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Đã hủy</option>
+                    </select>
+                    <button type="submit" class="button">Cập nhật</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 1}" th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, recipientName=${recipientName}, status=${status})}">Trước</a>
+        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:if="${i != currentPage}" th:href="@{/admin/orders(page=${i}, size=${pageSize}, recipientName=${recipientName}, status=${status})}" th:text="${i}"></a>
+            <span th:if="${i == currentPage}" class="current" th:text="${i}"></span>
+        </span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, recipientName=${recipientName}, status=${status})}">Sau</a>
+    </div>
+</div>
+
+</body>
+</html>

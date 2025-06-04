@@ -9,4 +9,10 @@ public interface ProductRepository {
     long countAll();
     Product findById(int id);
     void update(Product product);
+    void save(Product product);
+    void delete(Product product);
+    long countByStockGreaterThan(int stock);
+    long countByStock(int stock);
+    List<Product> findByPriceRangePaginated(double minPrice, double maxPrice, int page, int size);
+    long countByPriceRange(double minPrice, double maxPrice);
 }

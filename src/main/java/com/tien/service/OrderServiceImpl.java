@@ -6,12 +6,14 @@ import com.tien.model.Product;
 import com.tien.model.ProductCart;
 import com.tien.repository.OrderRepository;
 import com.tien.repository.ProductRepository;
-import com.tien.repository.ProductCartRepository; // Thêm để xóa giỏ hàng
+import com.tien.repository.ProductCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +28,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductCartRepository productCartRepository;
-
 
     @Override
     public Order createOrder(Order orderDetails, Customer customer, List<ProductCart> cartItems) throws IllegalArgumentException {
@@ -97,5 +98,49 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order getOrderByIdAndCustomerId(int orderId, int customerId) {
         return orderRepository.findByIdAndCustomerId(orderId, customerId);
+    }
+
+    @Override
+    public List<Order> getAllOrders(int page, int size) {
+        return orderRepository.findAllPaginated(page, size);
+    }
+
+    @Override
+    public long countAllOrders() {
+        return orderRepository.countAll();
+    }
+
+    @Override
+    public void updateOrderStatus(int orderId, String status) {
+        Order order = orderRepository.findById(orderId);
+        if (order != null) {
+            order.setStatus(status);
+            orderRepository.update(order);
+        }
+    }
+
+    @Override
+    public Map<String, Long> countOrdersByStatus() {
+        Map<String, Long> statusCounts = new HashMap<>();
+        String[] statuses = {"PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"};
+        for (String status : statuses) {
+            statusCounts.put(status, orderRepository.countByStatus(status));
+        }
+        return statusCounts;
+    }
+
+    @Override
+    public double getTotalRevenue() {
+        return orderRepository.getTotalRevenue();
+    }
+
+    @Override
+    public List<Order> searchOrdersByRecipientNameAndStatus(String recipientName, String status, int page, int size) {
+        return orderRepository.findByRecipientNameAndStatusPaginated(recipientName, status, page, size);
+    }
+
+    @Override
+    public long countOrdersByRecipientNameAndStatus(String recipientName, String status) {
+        return orderRepository.countByRecipientNameAndStatus(recipientName, status);
     }
 }

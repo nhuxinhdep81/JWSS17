@@ -6,10 +6,42 @@
     <th:block th:replace="~{fragments/common-styles :: styles}"></th:block>
 </head>
 <body>
-<div th:replace="~{fragments/navigation :: navbar}"></div>
+<div th:replace="~{fragments/admin_navigation :: navbar_admin}"></div>
 
 <div class="container">
-    <h1>Chào mừng đến Trang Quản Trị</h1>
+    <h1>Thống Kê Hệ Thống</h1>
+
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Thống Kê Người Dùng</h3>
+            <table>
+                <tr><th>Tổng số người dùng</th><td th:text="${totalCustomers}"></td></tr>
+
+            </table>
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Thống Kê Sản Phẩm</h3>
+            <table>
+                <tr><th>Tổng số sản phẩm</th><td th:text="${totalProducts}"></td></tr>
+
+            </table>
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Thống Kê Đơn Hàng</h3>
+            <table>
+                <tr><th>Tổng số đơn hàng</th><td th:text="${totalOrders}"></td></tr>
+            </table>
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Thống Kê Doanh Thu</h3>
+            <table>
+                <tr><th>Tổng doanh thu</th><td th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td></tr>
+            </table>
+        </div>
+    </div>
 
 </div>
 

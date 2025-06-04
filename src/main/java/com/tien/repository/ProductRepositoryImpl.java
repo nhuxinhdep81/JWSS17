@@ -37,4 +37,50 @@ public class ProductRepositoryImpl implements ProductRepository {
     public void update(Product product) {
         sessionFactory.getCurrentSession().merge(product);
     }
+
+    @Override
+    public void save(Product product) {
+        sessionFactory.getCurrentSession().saveOrUpdate(product);
+    }
+
+    @Override
+    public void delete(Product product) {
+        sessionFactory.getCurrentSession().delete(product);
+    }
+
+    @Override
+    public long countByStockGreaterThan(int stock) {
+        return sessionFactory.getCurrentSession()
+                .createQuery("SELECT COUNT(p.id) FROM Product p WHERE p.stock > :stock", Long.class)
+                .setParameter("stock", stock)
+                .uniqueResult();
+    }
+
+    @Override
+    public long countByStock(int stock) {
+        return sessionFactory.getCurrentSession()
+                .createQuery("SELECT COUNT(p.id) FROM Product p WHERE p.stock = :stock", Long.class)
+                .setParameter("stock", stock)
+                .uniqueResult();
+    }
+
+    @Override
+    public List<Product> findByPriceRangePaginated(double minPrice, double maxPrice, int page, int size) {
+        return sessionFactory.getCurrentSession()
+                .createQuery("FROM Product p WHERE p.price BETWEEN :minPrice AND :maxPrice", Product.class)
+                .setParameter("minPrice", minPrice)
+                .setParameter("maxPrice", maxPrice)
+                .setFirstResult((page - 1) * size)
+                .setMaxResults(size)
+                .list();
+    }
+
+    @Override
+    public long countByPriceRange(double minPrice, double maxPrice) {
+        return sessionFactory.getCurrentSession()
+                .createQuery("SELECT COUNT(p.id) FROM Product p WHERE p.price BETWEEN :minPrice AND :maxPrice", Long.class)
+                .setParameter("minPrice", minPrice)
+                .setParameter("maxPrice", maxPrice)
+                .uniqueResult();
+    }
 }
